@@ -1,50 +1,30 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import {
-  API_KEY_HEADER,
-  USER_HEADER,
-} from '../common/constants/headers.constants.js';
+import { API_KEY_HEADER } from '../common/guards/api-key.guard.js';
 
-export const API_KEY_SECURITY = 'api-key';
-export const USER_SECURITY = 'x-user';
+export const SWAGGER_PATH = 'api/docs';
 
-export function setupSwagger(app: INestApplication, path: string) {
+export function setupSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
-    .setTitle('API Solicitudes Comerciales')
+    .setTitle('FleetCore API')
     .setDescription(
       [
-        'API REST para registrar y gestionar solicitudes de seguimiento comercial.',
+        'API REST para gestionar los mantenimientos de la flota de FleetCore.',
         '',
         '**Cómo probar:** pulsa **Authorize** e ingresa:',
-        `- \`${API_KEY_HEADER}\`: una de las claves de \`API_KEYS\` en tu .env (ej. \`dev-key-123\`).`,
-        `- \`${USER_HEADER}\`: un usuario de prueba: \`admin\`, \`supervisor\`, \`asesor1\` o \`asesor2\`.`,
+        '- `bearer`: el token JWT que devuelve `POST /api/auth/login`.',
+        `- \`${API_KEY_HEADER}\`: una de las claves de \`API_KEYS\` (solo endpoints de integración).`,
       ].join('\n'),
     )
     .setVersion('1.0')
+    .addBearerAuth()
     .addApiKey(
-      {
-        type: 'apiKey',
-        name: API_KEY_HEADER,
-        in: 'header',
-        description: 'API Key configurada en API_KEYS',
-      },
-      API_KEY_SECURITY,
+      { type: 'apiKey', name: API_KEY_HEADER, in: 'header' },
+      API_KEY_HEADER,
     )
-    .addApiKey(
-      {
-        type: 'apiKey',
-        name: USER_HEADER,
-        in: 'header',
-        description: 'Usuario de prueba (define el rol)',
-      },
-      USER_SECURITY,
-    )
-    // Un solo objeto = ambos encabezados son requeridos a la vez (AND).
-    .addSecurityRequirements({ [API_KEY_SECURITY]: [], [USER_SECURITY]: [] })
     .build();
-
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(path, app, document, {
+  SwaggerModule.setup(SWAGGER_PATH, app, document, {
     swaggerOptions: { persistAuthorization: true },
   });
 }

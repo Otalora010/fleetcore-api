@@ -2,8 +2,6 @@
  * Configuración tipada de la aplicación.
  * Se consume con ConfigService: config.get('apiKeys'), config.get('database'), etc.
  */
-const toBool = (value: string | undefined, fallback: boolean) =>
-  value === undefined ? fallback : value === 'true';
 
 /** "k1, k2,,k3" -> ['k1', 'k2', 'k3'] */
 export const parseList = (value: string | undefined): string[] =>
@@ -13,19 +11,18 @@ export const parseList = (value: string | undefined): string[] =>
     .filter(Boolean);
 
 const configuration = () => ({
-  env: process.env.NODE_ENV ?? 'development',
   port: parseInt(process.env.PORT ?? '3000', 10),
   apiKeys: parseList(process.env.API_KEYS),
-  swaggerPath: process.env.SWAGGER_PATH ?? 'docs',
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  },
   database: {
-    type: process.env.DB_TYPE ?? 'better-sqlite3',
-    database: process.env.DB_DATABASE ?? 'data/database.sqlite',
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined,
+    port: parseInt(process.env.DB_PORT ?? '5432', 10),
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    synchronize: toBool(process.env.DB_SYNCHRONIZE, true),
-    logging: toBool(process.env.DB_LOGGING, false),
+    name: process.env.DB_NAME,
   },
 });
 

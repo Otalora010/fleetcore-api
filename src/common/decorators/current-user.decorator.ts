@@ -5,10 +5,10 @@ import {
 } from '../interfaces/authenticated-user.interface.js';
 
 /**
- * Inyecta el usuario validado por UserGuard.
+ * Inyecta el usuario autenticado por el guard JWT.
  *
  * @example findAll(@CurrentUser() user: AuthenticatedUser)
- * @example findAll(@CurrentUser('role') role: Role)
+ * @example findAll(@CurrentUser('role') role: UserRole)
  */
 export const CurrentUser = createParamDecorator(
   (field: keyof AuthenticatedUser | undefined, ctx: ExecutionContext) => {

@@ -1,11 +1,11 @@
 import { SetMetadata } from '@nestjs/common';
 import { ROLES_KEY } from '../constants/metadata.constants.js';
-import { Role } from '../enums/role.enum.js';
+import { UserRole } from '../enums/user-role.enum.js';
 
 /**
  * Declara los roles autorizados para un endpoint o controlador.
- * Sin @Roles cualquier usuario identificado puede acceder.
+ * Sin @Roles cualquier usuario autenticado puede acceder.
  *
- * @example @Roles(Role.ADMIN, Role.SUPERVISOR)
+ * @example @Roles(UserRole.ADMIN, UserRole.MANAGER)
  */
-export const Roles = (...roles: Role[]) => SetMetadata(ROLES_KEY, roles);
+export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);

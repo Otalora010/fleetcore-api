@@ -1,11 +1,11 @@
 import { Request } from 'express';
-import { Role } from '../enums/role.enum.js';
+import { UserRole } from '../enums/user-role.enum.js';
 
-/** Usuario validado por UserGuard y adjuntado a request.user. */
+/** Usuario autenticado (payload del JWT) adjuntado a request.user. */
 export interface AuthenticatedUser {
-  username: string;
-  name: string;
-  role: Role;
+  id: number;
+  email: string;
+  role: UserRole;
 }
 
 export interface RequestWithUser extends Request {

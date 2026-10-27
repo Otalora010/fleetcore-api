@@ -5,35 +5,30 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Reflector } from '@nestjs/core';
 import { timingSafeEqual } from 'node:crypto';
 import { Request } from 'express';
-import { API_KEY_HEADER } from '../constants/headers.constants.js';
-import { headerValue, isPublicRoute } from '../utils/is-public.util.js';
+import { headerValue } from '../utils/is-public.util.js';
+
+export const API_KEY_HEADER = 'x-api-key';
 
 /**
- * Guard 1/3 – Valida x-api-key contra la lista API_KEYS del entorno.
- * Corre antes que cualquier otra lógica: si falla, el controlador nunca se ejecuta.
+ * Protege los endpoints de integración externa con x-api-key.
+ * No es global: se aplica con @UseGuards(ApiKeyGuard) junto a @Public(),
+ * porque esos clientes no tienen JWT. Las claves válidas vienen de API_KEYS.
  */
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
   private readonly apiKeys: Buffer[];
 
-  constructor(
-    private readonly reflector: Reflector,
-    config: ConfigService,
-  ) {
+  constructor(config: ConfigService) {
     this.apiKeys = (config.get<string[]>('apiKeys') ?? []).map((key) =>
       Buffer.from(key),
     );
   }
 
   canActivate(context: ExecutionContext): boolean {
-    if (isPublicRoute(this.reflector, context)) return true;
-
     const request = context.switchToHttp().getRequest<Request>();
     const apiKey = headerValue(request.headers[API_KEY_HEADER]);
-
     if (!apiKey) {
       throw new UnauthorizedException(`Falta el encabezado ${API_KEY_HEADER}`);
     }

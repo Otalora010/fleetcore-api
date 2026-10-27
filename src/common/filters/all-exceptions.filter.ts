@@ -10,13 +10,27 @@ import { Request, Response } from 'express';
 import { EntityNotFoundError, QueryFailedError } from 'typeorm';
 import { ErrorResponseDto } from '../dto/error-response.dto.js';
 
+/** Códigos de error de PostgreSQL que son culpa del cliente, no del servidor. */
+const PG_ERRORS: Record<string, { statusCode: number; message: string }> = {
+  '23505': {
+    statusCode: HttpStatus.CONFLICT,
+    message: 'El registro ya existe',
+  },
+  '23503': {
+    statusCode: HttpStatus.CONFLICT,
+    message: 'El registro está relacionado con otros datos',
+  },
+  '22P02': {
+    statusCode: HttpStatus.BAD_REQUEST,
+    message: 'Formato de dato inválido',
+  },
+};
+
 /**
- * Normaliza TODOS los errores:
- * { success: false, statusCode, error, message, path, method, timestamp }
- *
+ * Normaliza TODOS los errores a { success: false, statusCode, message, path, timestamp }.
  * - HttpException (400, 401, 403, 404, 409...) conserva su código real.
- * - Errores conocidos de TypeORM se traducen a 404/409 en vez de 500.
- * - Solo lo realmente inesperado responde 500 (y se registra en el log).
+ * - Errores conocidos de TypeORM/PostgreSQL se traducen a 400/404/409 en vez de 500.
+ * - Solo lo realmente inesperado responde 500, sin filtrar detalles internos.
  */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -26,7 +40,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-
     const { statusCode, message } = this.resolve(exception);
 
     if (statusCode >= 500) {
@@ -39,13 +52,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const body: ErrorResponseDto = {
       success: false,
       statusCode,
-      error: (HttpStatus[statusCode] as string | undefined) ?? 'ERROR',
       message,
       path: request.url,
-      method: request.method,
       timestamp: new Date().toISOString(),
     };
-
     response.status(statusCode).json(body);
   }
 
@@ -62,27 +72,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
             exception.message);
       return { statusCode: exception.getStatus(), message };
     }
-
     if (exception instanceof EntityNotFoundError) {
       return {
         statusCode: HttpStatus.NOT_FOUND,
         message: 'Recurso no encontrado',
       };
     }
-
     if (exception instanceof QueryFailedError) {
-      if (/unique|duplicate/i.test(exception.message)) {
-        return {
-          statusCode: HttpStatus.CONFLICT,
-          message: 'El registro ya existe',
-        };
-      }
-      return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Operación inválida sobre la base de datos',
-      };
+      const code = (exception.driverError as { code?: string } | undefined)
+        ?.code;
+      const known = code ? PG_ERRORS[code] : undefined;
+      if (known) return known;
     }
-
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'Error interno del servidor',

@@ -5,24 +5,18 @@ export class ErrorResponseDto {
   @ApiProperty({ example: false })
   success: false;
 
-  @ApiProperty({ example: 400 })
+  @ApiProperty({ example: 409 })
   statusCode: number;
-
-  @ApiProperty({ example: 'Bad Request' })
-  error: string;
 
   @ApiProperty({
     oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
-    example: ['cliente should not be empty'],
+    example: 'El vehículo ABC123 ya tiene un mantenimiento activo',
   })
   message: string | string[];
 
-  @ApiProperty({ example: '/solicitudes' })
+  @ApiProperty({ example: '/api/maintenances' })
   path: string;
 
-  @ApiProperty({ example: 'POST' })
-  method: string;
-
-  @ApiProperty({ example: '2026-10-26T12:00:00.000Z' })
+  @ApiProperty({ example: '2026-10-20T19:00:00.000Z' })
   timestamp: string;
 }
