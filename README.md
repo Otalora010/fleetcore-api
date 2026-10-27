@@ -69,3 +69,13 @@ Credenciales de prueba del seeder, endpoints, reglas de negocio, dump `.sql` y e
 - `GET /api/auth/me`: datos del usuario autenticado (requiere Bearer).
 - En Swagger (`/api/docs`) usa el botón **Authorize** y pega el `accessToken` (sin el prefijo `Bearer`).
 - Riesgo conocido: como el enunciado lo exige literalmente, el registro público permite crear usuarios `ADMIN`, es decir, cualquiera puede escalar privilegios. Aceptado para la prueba; en producción se restringiría.
+
+## Vehículos
+
+Lectura para cualquier usuario autenticado; escritura solo `ADMIN`.
+
+- `GET /api/vehicles`: lista.
+- `GET /api/vehicles/:id` y `GET /api/vehicles/plate/:plate`: detalle.
+- `POST /api/vehicles` (ADMIN): crea (estado inicial `AVAILABLE`).
+- `PATCH /api/vehicles/:id` (ADMIN): actualiza datos (no el estado; el kilometraje no puede bajar).
+- `PATCH /api/vehicles/:id/deactivate` (ADMIN): inactivación lógica.

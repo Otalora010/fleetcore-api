@@ -3,6 +3,7 @@ import { CoreModule } from './core/core.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { UsersModule } from './modules/users/users.module.js';
+import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
 
 /**
  * Módulo raíz: solo compone módulos.
@@ -11,6 +12,12 @@ import { UsersModule } from './modules/users/users.module.js';
  * - modules/*: un módulo por recurso de negocio (agrega los nuevos aquí).
  */
 @Module({
-  imports: [CoreModule, DatabaseModule, UsersModule, AuthModule],
+  imports: [
+    CoreModule,
+    DatabaseModule,
+    UsersModule,
+    AuthModule,
+    VehiclesModule,
+  ],
 })
 export class AppModule {}

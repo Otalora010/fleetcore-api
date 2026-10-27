@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | REQ-AUTH | 🟡 Parcial | Implementado: register, login, me, `JwtAuthGuard` global, `RolesGuard`, entidad `User`, con tests. Falta prueba manual con PostgreSQL real. |
 | REQ-APIKEY | 🟡 Parcial | `ApiKeyGuard` (no global, tiempo constante) con test. Falta el endpoint de integración. |
-| REQ-VEH | ⏳ Pendiente | — |
+| REQ-VEH | 🟡 Parcial | CRUD, consulta por placa e inactivación lógica listos con tests. Falta relación con Maintenance y reglas ligadas (ver Pendientes). |
 | REQ-MEC | ⏳ Pendiente | — |
 | REQ-TAL | ⏳ Pendiente | — |
 | REQ-MAN | ⏳ Pendiente | — |
@@ -32,12 +32,17 @@
 - **`JwtAuthGuard` no consulta la BD:** el token vale hasta expirar.
 - **Contraseña:** mínimo 8 caracteres; bcrypt con costo 10.
 - **JwtModule:** configurado una sola vez en `CoreModule` (`global: true`, `registerAsync`).
+- **Vehículos, permisos:** GET para cualquier autenticado (ADMIN y TECHNICIAN); POST, PATCH y deactivate solo ADMIN.
+- **Vehículos, estado:** el cliente no envía `status`; al crear siempre AVAILABLE. PATCH no lo acepta (400 por `forbidNonWhitelisted`). Solo cambia por mantenimientos (REQ-MAN) o `/deactivate`.
+- **Vehículos, PATCH:** el kilometraje no puede bajar (400); la placa puede cambiar con comprobación de unicidad (409); se permite sobre INACTIVE (solo datos).
+- **Vehículos, sin reactivar ni DELETE.** Placa: trim + mayúsculas, `^[A-Z0-9-]+$`, máx. 10. Año 1900..(año actual + 1) calculado al validar. Kilometraje entero ≥ 0.
 - El resto de ambigüedades de `agent.md` §1.6 siguen abiertas.
 
 ## Pendientes
 
 - Resolver ambigüedades de `agent.md` §1.6 (técnico vs. mecánico, duración, transiciones, kilometraje final, auditorías).
 - Probar el arranque con PostgreSQL real (el servicio local estaba detenido).
+- REQ-MAN sobre vehículos: `deactivate` debe rechazar con 409 si hay mantenimiento SCHEDULED o IN_PROGRESS; relación OneToMany Vehicle-Maintenance; rutas `/vehicles/:id/maintenances` y `/vehicles/:id/history`; regla "INACTIVE no recibe mantenimientos".
 
 ## Fuera de alcance
 
@@ -48,6 +53,14 @@
 - Ninguno registrado.
 
 ## Registro de cambios
+
+### 2026-10-27 — feat(REQ-VEH): CRUD de vehículos e inactivación lógica
+- **Archivos:** `src/common/enums/vehicle-status.enum.ts`, `src/modules/vehicles/entities/vehicle.entity.ts`, `src/modules/vehicles/dto/create-vehicle.dto.ts`, `src/modules/vehicles/dto/update-vehicle.dto.ts`, `src/modules/vehicles/vehicles.service.ts`, `src/modules/vehicles/vehicles.controller.ts`, `src/modules/vehicles/vehicles.module.ts`, `src/modules/vehicles/vehicles.service.spec.ts`, `src/modules/vehicles/dto/create-vehicle.dto.spec.ts`, `src/app.module.ts`, `README.md`
+- **Qué:** módulo de vehículos con listar, detalle por id y por placa, crear, actualizar e inactivar (lógico). Reglas y decisiones en "Decisiones".
+- **Por qué:** REQ-VEH.
+- **Impacto:** endpoints `/api/vehicles` (GET, POST, GET plate/:plate, GET/PATCH :id, PATCH :id/deactivate); tabla `vehicles` (por `synchronize`). Seeder aún no existe. Sin variables nuevas.
+- **Verificación:** `npm run test` ✅ (50/50) · `npm run lint` ✅ · `npm run build` ✅ · sin prueba manual (PostgreSQL apagado).
+- **Pendiente derivado:** ver Pendientes (integración con REQ-MAN).
 
 ### 2026-10-27 — feat(REQ-AUTH): registro, login, me y guard JWT global
 - **Archivos:** `package.json`, `package-lock.json`, `README.md`, `src/app.module.ts`, `src/core/core.module.ts`, `src/common/guards/jwt-auth.guard.ts`, `src/common/guards/jwt-auth.guard.spec.ts`, `src/common/guards/roles.guard.spec.ts`, `src/modules/users/entities/user.entity.ts`, `src/modules/users/users.module.ts`, `src/modules/auth/{auth.module,auth.controller,auth.service,auth.service.spec}.ts`, `src/modules/auth/dto/{register.dto,login.dto,register.dto.spec}.ts`
