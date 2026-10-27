@@ -41,7 +41,6 @@
 ## Pendientes
 
 - Resolver ambigüedades de `agent.md` §1.6 (técnico vs. mecánico, duración, transiciones, kilometraje final, auditorías).
-- Probar el arranque con PostgreSQL real (el servicio local estaba detenido).
 - REQ-MAN sobre vehículos: `deactivate` debe rechazar con 409 si hay mantenimiento SCHEDULED o IN_PROGRESS; relación OneToMany Vehicle-Maintenance; rutas `/vehicles/:id/maintenances` y `/vehicles/:id/history`; regla "INACTIVE no recibe mantenimientos".
 
 ## Fuera de alcance
@@ -50,9 +49,17 @@
 
 ## Bugs conocidos
 
-- Ninguno registrado.
+- **Mensajes en inglés (REQ-RES):** un campo no permitido devuelve `property X should not exist` y un id no numérico devuelve `Validation failed (numeric string is expected)`. agent.md §4 pide mensajes en español. Origen: textos por defecto de `ValidationPipe` (`forbidNonWhitelisted`) y `ParseIntPipe`.
 
 ## Registro de cambios
+
+### 2026-10-27 — test(REQ-AUTH, REQ-VEH): prueba manual contra PostgreSQL real
+- **Archivos:** `memory.md`
+- **Qué:** API arrancada contra PostgreSQL 18 local (usuario y base `fleetcore`). Se probaron con curl: registro (201, 409 duplicado, 400 rol MANAGER), login (401 genérico), `me`, 401 sin token y con token inválido, 403 de TECHNICIAN al crear vehículo, CRUD de vehículos (201, 409 placa, 400 `status` extra, búsqueda por placa en minúsculas, 400 id no numérico, 404, 400 kilometraje menor, inactivar y 409 al repetir). Contraseñas guardadas como hash bcrypt (`$2b$10$`). Ningún 500.
+- **Por qué:** verificar REQ-AUTH y REQ-VEH con BD real (pendiente desde la migración).
+- **Impacto:** tablas `users` y `vehicles` creadas por `synchronize`. El puerto 3000 está ocupado en esta máquina por otro servicio; el `.env` local usa otro puerto (no versionado).
+- **Verificación:** prueba manual ✅; `npm run test` ✅ (50/50) · `npm run lint` ✅ · `npm run build` ✅.
+- **Pendiente derivado:** mensajes en español en validaciones por defecto (ver Bugs conocidos).
 
 ### 2026-10-27 — feat(REQ-VEH): CRUD de vehículos e inactivación lógica
 - **Archivos:** `src/common/enums/vehicle-status.enum.ts`, `src/modules/vehicles/entities/vehicle.entity.ts`, `src/modules/vehicles/dto/create-vehicle.dto.ts`, `src/modules/vehicles/dto/update-vehicle.dto.ts`, `src/modules/vehicles/vehicles.service.ts`, `src/modules/vehicles/vehicles.controller.ts`, `src/modules/vehicles/vehicles.module.ts`, `src/modules/vehicles/vehicles.service.spec.ts`, `src/modules/vehicles/dto/create-vehicle.dto.spec.ts`, `src/app.module.ts`, `README.md`
