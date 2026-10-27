@@ -8,7 +8,7 @@
 | REQ-APIKEY | 🟡 Parcial | `ApiKeyGuard` (no global, tiempo constante) con test. Falta el endpoint de integración. |
 | REQ-VEH | 🟡 Parcial | CRUD, consulta por placa e inactivación lógica listos con tests. Falta relación con Maintenance y reglas ligadas (ver Pendientes). |
 | REQ-MEC | 🟡 Parcial | CRUD, activar/inactivar y vínculo opcional con técnico (`userId`) listos y probados manualmente. Falta integración con REQ-MAN (ver Pendientes). |
-| REQ-TAL | ⏳ Pendiente | — |
+| REQ-TAL | 🟡 Parcial | Listado de activos, detalle, crear y activar/inactivar listos con tests. Sin PATCH de edición (decisión: no lo pide el enunciado). Falta integración con REQ-MAN (relación y reglas). |
 | REQ-MAN | ⏳ Pendiente | — |
 | REQ-RN | ⏳ Pendiente | — |
 | REQ-RES | 🟡 Parcial | Interceptor y filtro con formato §5; filtro traduce 23505/23503/22P02. Falta verificar con endpoints reales. |
@@ -39,6 +39,7 @@
 - **Mecánicos (REQ-MEC):** GET para cualquier autenticado; escritura solo ADMIN. El estado es siempre ACTIVE al crear (el cliente no lo envía) y solo cambia con `/activate` y `/deactivate`.
 - **Vínculo mecánico-técnico:** `userId` opcional en POST y PATCH (solo ADMIN). Usuario inexistente 404; rol distinto de TECHNICIAN 400; ya vinculado a otro mecánico 409; re-vincular el mismo no da 409. Sin endpoint de desvincular ni `userId: null`.
 - **PATCH de mecánico sobre INACTIVE:** permitido (solo datos).
+- **Talleres (REQ-TAL):** GET para cualquier autenticado; POST y activate/deactivate solo ADMIN. El listado es solo ACTIVE; `findOne` devuelve también INACTIVE. El cliente no envía `status` (400 por `forbidNonWhitelisted`); al crear siempre ACTIVE. Unicidad de nombre exacta y sensible a mayúsculas (con trim), como el correo de mecánicos. Sin PATCH de edición de datos (aprobado: el enunciado no lo pide).
 - El resto de ambigüedades de `agent.md` §1.6 siguen abiertas.
 
 ## Pendientes
@@ -46,6 +47,7 @@
 - Resolver ambigüedades de `agent.md` §1.6 (técnico vs. mecánico, duración, transiciones, kilometraje final, auditorías).
 - REQ-MAN sobre vehículos: `deactivate` debe rechazar con 409 si hay mantenimiento SCHEDULED o IN_PROGRESS; relación OneToMany Vehicle-Maintenance; rutas `/vehicles/:id/maintenances` y `/vehicles/:id/history`; regla "INACTIVE no recibe mantenimientos".
 - REQ-MAN sobre mecánicos: un mecánico INACTIVE no recibe mantenimientos nuevos; `deactivate` debe rechazar con 409 si tiene mantenimientos SCHEDULED o IN_PROGRESS; relación OneToMany Mechanic-Maintenance; rutas `/mechanics/:id/maintenances` y `/maintenances/me`; cruce de horarios [inicio, fin) del mecánico; el TECHNICIAN solo ve y modifica los suyos (403).
+- REQ-MAN sobre talleres: relación OneToMany Workshop-Maintenance; `deactivate` debe rechazar con 409 si tiene mantenimientos SCHEDULED o IN_PROGRESS; regla "taller inexistente o inactivo no recibe mantenimientos".
 
 ## Fuera de alcance
 
@@ -56,6 +58,22 @@
 - **Mensajes en inglés (REQ-RES):** un campo no permitido devuelve `property X should not exist` y un id no numérico devuelve `Validation failed (numeric string is expected)`. agent.md §4 pide mensajes en español. Origen: textos por defecto de `ValidationPipe` (`forbidNonWhitelisted`) y `ParseIntPipe`.
 
 ## Registro de cambios
+
+### 2026-10-27 — feat(REQ-TAL): gestor de talleres con listado de activos
+- **Archivos:** `src/common/enums/workshop-status.enum.ts`, `src/modules/workshops/entities/workshop.entity.ts`, `src/modules/workshops/dto/create-workshop.dto.ts`, `src/modules/workshops/dto/create-workshop.dto.spec.ts`, `src/modules/workshops/workshops.service.ts`, `src/modules/workshops/workshops.service.spec.ts`, `src/modules/workshops/workshops.controller.ts`, `src/modules/workshops/workshops.module.ts`, `src/app.module.ts`, `README.md`
+- **Qué:** módulo de talleres: `GET /api/workshops` (solo ACTIVE), `GET /api/workshops/:id` (aunque INACTIVE), `POST` y `PATCH :id/activate|/deactivate` (ADMIN). Nombre único exacto con trim (409 `"Ya existe un taller con el nombre X"`); estado siempre ACTIVE al crear (el cliente no envía `status`); 409 si ya está en el estado objetivo; inactivación lógica con `save` (no `remove`/`delete`) para no perder historial. Sin PATCH de edición de datos (decisión aprobada: el enunciado no lo pide) y sin `UpdateWorkshopDto`.
+- **Por qué:** REQ-TAL.
+- **Impacto:** endpoints `/api/workshops` (GET, POST, GET :id, PATCH :id/activate, PATCH :id/deactivate); tabla `workshops` (por `synchronize`, sin relaciones). Sin seeder ni variables de entorno.
+- **Verificación:** `npm run test` ✅ (90/90) · `npm run lint` ✅ · `npm run build` ✅ · prueba manual con PostgreSQL (puerto 3999): 201 crear, 409 nombre, 400 `status` extra, 401 sin token, 403 técnico en POST/activate, 400 address vacío, 200 lista y detalle, 400 id no numérico, 404 inexistente, deactivate 200 y lista solo activos, detalle de INACTIVE 200, 409 repetido activate/deactivate, 404 activate inexistente. Ningún 500.
+- **Pendiente derivado:** relación y reglas de taller en REQ-MAN (ver Pendientes); seeder de talleres en REQ-SEED.
+
+### 2026-10-27 — chore(REQ-ENT): traspaso a OpenCode
+- **Archivos:** `AGENTS.md`, `opencode.json`, `.opencode/agents/req-analista.md`, `.opencode/agents/req-implementador.md`, `.opencode/agents/req-revisor.md`, `.opencode/commands/implementar.md`
+- **Qué:** la persona continúa con OpenCode. `AGENTS.md` resume estado, flujo, entorno y decisiones. `opencode.json` carga `agent.md`, `memory.md` y `docs/requisitos.md` como instrucciones. Los 3 agentes y el comando `/implementar` se copian al formato de OpenCode (subagentes con `permission`: analista y revisor sin edición, implementador sin `git push`/`merge`). Se mantienen los de `.claude/`.
+- **Por qué:** continuidad del trabajo con otra herramienta.
+- **Impacto:** ninguno en la API.
+- **Verificación:** `opencode agent list` muestra `req-analista`, `req-implementador` y `req-revisor` como subagentes; `opencode debug config` carga las 3 instrucciones y el comando `implementar`.
+- **Pendiente derivado:** ninguno.
 
 ### 2026-10-27 — feat(REQ-MEC): CRUD de mecánicos con activación e inactivación lógica
 - **Archivos:** `src/common/enums/mechanic-status.enum.ts`, `src/modules/mechanics/entities/mechanic.entity.ts`, `src/modules/mechanics/dto/create-mechanic.dto.ts`, `src/modules/mechanics/dto/update-mechanic.dto.ts`, `src/modules/mechanics/mechanics.service.ts`, `src/modules/mechanics/mechanics.controller.ts`, `src/modules/mechanics/mechanics.module.ts`, `src/modules/mechanics/mechanics.service.spec.ts`, `src/modules/mechanics/dto/create-mechanic.dto.spec.ts`, `src/app.module.ts`, `README.md`

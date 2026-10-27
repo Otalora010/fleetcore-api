@@ -30,15 +30,15 @@ Si falta una variable obligatoria del `.env`, la app no arranca y muestra cuál.
 
 ## Comandos
 
-| Comando | Qué hace |
-| --- | --- |
-| `npm run start:dev` | Desarrollo con recarga |
-| `npm run build` | Compila a `dist/` |
+| Comando              | Qué hace               |
+| -------------------- | ---------------------- |
+| `npm run start:dev`  | Desarrollo con recarga |
+| `npm run build`      | Compila a `dist/`      |
 | `npm run start:prod` | Ejecuta `dist/main.js` |
-| `npm run test` | Tests unitarios (Jest) |
-| `npm run test:cov` | Tests con cobertura |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier |
+| `npm run test`       | Tests unitarios (Jest) |
+| `npm run test:cov`   | Tests con cobertura    |
+| `npm run lint`       | ESLint                 |
+| `npm run format`     | Prettier               |
 
 ## Variables de entorno
 
@@ -49,13 +49,24 @@ Ver [`.env.example`](.env.example): `PORT`, `DB_HOST`, `DB_PORT`, `DB_USERNAME`,
 Éxito:
 
 ```json
-{ "success": true, "statusCode": 200, "data": {}, "timestamp": "2026-10-20T19:00:00.000Z" }
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {},
+  "timestamp": "2026-10-20T19:00:00.000Z"
+}
 ```
 
 Error:
 
 ```json
-{ "success": false, "statusCode": 409, "message": "El vehículo ABC123 ya tiene un mantenimiento activo", "path": "/api/maintenances", "timestamp": "2026-10-20T19:00:00.000Z" }
+{
+  "success": false,
+  "statusCode": 409,
+  "message": "El vehículo ABC123 ya tiene un mantenimiento activo",
+  "path": "/api/maintenances",
+  "timestamp": "2026-10-20T19:00:00.000Z"
+}
 ```
 
 ## Pendiente de documentar
@@ -88,3 +99,12 @@ Lectura para cualquier usuario autenticado; escritura solo `ADMIN`.
 - `POST /api/mechanics` (ADMIN): crea (estado inicial `ACTIVE`; `userId` opcional de un usuario `TECHNICIAN`).
 - `PATCH /api/mechanics/:id` (ADMIN): actualiza datos y/o vínculo `userId`.
 - `PATCH /api/mechanics/:id/activate` y `/deactivate` (ADMIN): activar e inactivar (lógico).
+
+## Talleres
+
+Lectura para cualquier usuario autenticado; escritura solo `ADMIN`. El listado muestra solo los activos.
+
+- `GET /api/workshops`: lista de talleres activos.
+- `GET /api/workshops/:id`: detalle (aunque esté inactivo).
+- `POST /api/workshops` (ADMIN): crea (estado inicial `ACTIVE`; nombre único).
+- `PATCH /api/workshops/:id/activate` y `/deactivate` (ADMIN): activar e inactivar (lógico, sin borrar historial).
