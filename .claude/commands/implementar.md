@@ -1,5 +1,8 @@
+---
+description: Implementa un requisito de FleetCore con el flujo analista → implementador → revisor
+argument-hint: requisito o módulo [detalle opcional]
+---
 
-requisito o módulo [detalle opcional]
 Implementa $ARGUMENTS de la prueba de desempeño FleetCore usando los subagentes disponibles del proyecto. Tú coordinas el flujo: no escribas código directamente. Respeta el enunciado de la prueba como fuente principal y trabaja sobre el proyecto existente.
 
 Flujo de trabajo

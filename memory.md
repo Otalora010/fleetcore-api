@@ -43,6 +43,14 @@
 
 ## Registro de cambios
 
+### 2026-10-27 — chore(REQ-ENT): agentes y comando en .claude/
+- **Archivos:** `.claude/agents/analista.md`, `.claude/agents/implimentador.md`, `.claude/agents/revisor.md`, `.claude/commands/implementar.md`, `CLAUDE.md`
+- **Qué:** los agentes pasan de `claude/agents/` a `.claude/agents/`. El comando pasa a `.claude/commands/implementar.md` (`/implementar <REQ>`) y recupera su frontmatter (`argument-hint`). `CLAUDE.md` importa `agent.md` y `memory.md`.
+- **Por qué:** Claude Code solo detecta agentes y comandos dentro de `.claude/`, y solo carga `CLAUDE.md` automáticamente.
+- **Impacto:** ninguno en la API.
+- **Verificación:** sin cambios de código; no aplica.
+- **Pendiente derivado:** ninguno.
+
 ### 2026-10-27 — build(REQ-DB): migrar la base al stack de agent.md
 - **Archivos:** `package.json`, `package-lock.json`, `tsconfig.json`, `eslint.config.mjs`, `.env.example`, `.gitignore`, `README.md`, `src/main.ts`, `src/app.module.ts`, `src/core/core.module.ts`, `src/database/database.module.ts`, `src/config/configuration.ts`, `src/config/env.validation.ts`, `src/config/swagger.config.ts`, `src/common/enums/user-role.enum.ts`, `src/common/guards/api-key.guard.ts`, `src/common/guards/api-key.guard.spec.ts`, `src/common/guards/roles.guard.ts`, `src/common/filters/all-exceptions.filter.ts`, `src/common/filters/all-exceptions.filter.spec.ts`, `src/common/dto/error-response.dto.ts`, `src/common/decorators/*.ts`, `src/common/interfaces/authenticated-user.interface.ts`.
 - **Qué:** SQLite → PostgreSQL (`pg`); Vitest → Jest + ts-jest; oxlint → ESLint + typescript-eslint + Prettier; se instalan `@nestjs/jwt` y `argon2`. Prefijo `/api` y Swagger en `/api/docs` con Bearer y `x-api-key`. Env según agent.md §2, todas obligatorias. Enum `UserRole` (ADMIN, TECHNICIAN, MANAGER). Filtro con formato §5.2 y códigos PostgreSQL. Se borran `solicitudes`, `users` en memoria, `UserGuard` (`x-user`), `health`, e2e de solicitudes, `base.entity.ts` y `api-error-responses.decorator.ts`.
