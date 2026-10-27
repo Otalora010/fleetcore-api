@@ -3,6 +3,7 @@ import { CoreModule } from './core/core.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { UsersModule } from './modules/users/users.module.js';
+import { MechanicsModule } from './modules/mechanics/mechanics.module.js';
 import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
 
 /**
@@ -18,6 +19,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     UsersModule,
     AuthModule,
     VehiclesModule,
+    MechanicsModule,
   ],
 })
 export class AppModule {}

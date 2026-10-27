@@ -7,7 +7,7 @@
 | REQ-AUTH | 🟡 Parcial | Implementado: register, login, me, `JwtAuthGuard` global, `RolesGuard`, entidad `User`, con tests. Falta prueba manual con PostgreSQL real. |
 | REQ-APIKEY | 🟡 Parcial | `ApiKeyGuard` (no global, tiempo constante) con test. Falta el endpoint de integración. |
 | REQ-VEH | 🟡 Parcial | CRUD, consulta por placa e inactivación lógica listos con tests. Falta relación con Maintenance y reglas ligadas (ver Pendientes). |
-| REQ-MEC | ⏳ Pendiente | — |
+| REQ-MEC | 🟡 Parcial | CRUD, activar/inactivar y vínculo opcional con técnico (`userId`) listos y probados manualmente. Falta integración con REQ-MAN (ver Pendientes). |
 | REQ-TAL | ⏳ Pendiente | — |
 | REQ-MAN | ⏳ Pendiente | — |
 | REQ-RN | ⏳ Pendiente | — |
@@ -36,12 +36,16 @@
 - **Vehículos, estado:** el cliente no envía `status`; al crear siempre AVAILABLE. PATCH no lo acepta (400 por `forbidNonWhitelisted`). Solo cambia por mantenimientos (REQ-MAN) o `/deactivate`.
 - **Vehículos, PATCH:** el kilometraje no puede bajar (400); la placa puede cambiar con comprobación de unicidad (409); se permite sobre INACTIVE (solo datos).
 - **Vehículos, sin reactivar ni DELETE.** Placa: trim + mayúsculas, `^[A-Z0-9-]+$`, máx. 10. Año 1900..(año actual + 1) calculado al validar. Kilometraje entero ≥ 0.
+- **Mecánicos (REQ-MEC):** GET para cualquier autenticado; escritura solo ADMIN. El estado es siempre ACTIVE al crear (el cliente no lo envía) y solo cambia con `/activate` y `/deactivate`.
+- **Vínculo mecánico-técnico:** `userId` opcional en POST y PATCH (solo ADMIN). Usuario inexistente 404; rol distinto de TECHNICIAN 400; ya vinculado a otro mecánico 409; re-vincular el mismo no da 409. Sin endpoint de desvincular ni `userId: null`.
+- **PATCH de mecánico sobre INACTIVE:** permitido (solo datos).
 - El resto de ambigüedades de `agent.md` §1.6 siguen abiertas.
 
 ## Pendientes
 
 - Resolver ambigüedades de `agent.md` §1.6 (técnico vs. mecánico, duración, transiciones, kilometraje final, auditorías).
 - REQ-MAN sobre vehículos: `deactivate` debe rechazar con 409 si hay mantenimiento SCHEDULED o IN_PROGRESS; relación OneToMany Vehicle-Maintenance; rutas `/vehicles/:id/maintenances` y `/vehicles/:id/history`; regla "INACTIVE no recibe mantenimientos".
+- REQ-MAN sobre mecánicos: un mecánico INACTIVE no recibe mantenimientos nuevos; `deactivate` debe rechazar con 409 si tiene mantenimientos SCHEDULED o IN_PROGRESS; relación OneToMany Mechanic-Maintenance; rutas `/mechanics/:id/maintenances` y `/maintenances/me`; cruce de horarios [inicio, fin) del mecánico; el TECHNICIAN solo ve y modifica los suyos (403).
 
 ## Fuera de alcance
 
@@ -52,6 +56,14 @@
 - **Mensajes en inglés (REQ-RES):** un campo no permitido devuelve `property X should not exist` y un id no numérico devuelve `Validation failed (numeric string is expected)`. agent.md §4 pide mensajes en español. Origen: textos por defecto de `ValidationPipe` (`forbidNonWhitelisted`) y `ParseIntPipe`.
 
 ## Registro de cambios
+
+### 2026-10-27 — feat(REQ-MEC): CRUD de mecánicos con activación e inactivación lógica
+- **Archivos:** `src/common/enums/mechanic-status.enum.ts`, `src/modules/mechanics/entities/mechanic.entity.ts`, `src/modules/mechanics/dto/create-mechanic.dto.ts`, `src/modules/mechanics/dto/update-mechanic.dto.ts`, `src/modules/mechanics/mechanics.service.ts`, `src/modules/mechanics/mechanics.controller.ts`, `src/modules/mechanics/mechanics.module.ts`, `src/modules/mechanics/mechanics.service.spec.ts`, `src/modules/mechanics/dto/create-mechanic.dto.spec.ts`, `src/app.module.ts`, `README.md`
+- **Qué:** corrección de ronda 1: `update` ya no pone `user = null`; asigna `user = { id: userId }` y `userId` (antes re-vincular el mismo usuario lo desvinculaba, porque la relación cargada gana sobre la columna). 3 tests nuevos que lo reproducen. Endpoints de mecánicos (listar, detalle, crear, actualizar, activar, inactivar). Correo único y normalizado; vínculo opcional 1:1 con usuario TECHNICIAN; la respuesta incluye `user` sin `password` (select:false).
+- **Por qué:** REQ-MEC.
+- **Impacto:** tabla `mechanics` (columna `userId` única y nullable). Sin cambios en seeder ni variables de entorno.
+- **Verificación:** `npm run test` ✅ (76/76) · `npm run lint` ✅ · `npm run build` ✅ · prueba manual con PostgreSQL (revisor): 201 crear con técnico (correo normalizado), 409 correo, 404/400/409 de userId, 403 técnico al crear, 200 técnico al listar, password no expuesto, PATCH sin userId conserva vínculo, activate/deactivate y 409 repetido, 404 inexistente; bug de re-vincular hallado y corregido.
+- **Pendiente derivado:** reglas de mecánico en REQ-MAN (ver Pendientes); seeder de mecánicos en REQ-SEED.
 
 ### 2026-10-27 — test(REQ-AUTH, REQ-VEH): prueba manual contra PostgreSQL real
 - **Archivos:** `memory.md`

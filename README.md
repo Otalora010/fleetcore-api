@@ -79,3 +79,12 @@ Lectura para cualquier usuario autenticado; escritura solo `ADMIN`.
 - `POST /api/vehicles` (ADMIN): crea (estado inicial `AVAILABLE`).
 - `PATCH /api/vehicles/:id` (ADMIN): actualiza datos (no el estado; el kilometraje no puede bajar).
 - `PATCH /api/vehicles/:id/deactivate` (ADMIN): inactivación lógica.
+
+## Mecánicos
+
+Lectura para cualquier usuario autenticado; escritura solo `ADMIN`.
+
+- `GET /api/mechanics` y `GET /api/mechanics/:id`: lista y detalle.
+- `POST /api/mechanics` (ADMIN): crea (estado inicial `ACTIVE`; `userId` opcional de un usuario `TECHNICIAN`).
+- `PATCH /api/mechanics/:id` (ADMIN): actualiza datos y/o vínculo `userId`.
+- `PATCH /api/mechanics/:id/activate` y `/deactivate` (ADMIN): activar e inactivar (lógico).
