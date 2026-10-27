@@ -66,7 +66,7 @@ Si el enunciado no fija un detalle (nombre de campo, código HTTP, mensaje), eli
 
 1.2 Requisitos (resumen; el detalle está en docs/requisitos.md)
 ID	Qué exige	Endpoints propuestos	Auth
-REQ-AUTH	Registro y login por email + contraseña; hash con argon2; JWT; guard global; @Roles() + RolesGuard; mínimo 3 decoradores (@Roles, @CurrentUser, @Public); 401 sin token, token inválido o expirado; 403 sin rol	POST /api/auth/register, POST /api/auth/login, GET /api/auth/me	Público / JWT
+REQ-AUTH	Registro y login por email + contraseña; hash de contraseñas (sin argon2; ver memory.md → Decisiones); JWT; guard global; @Roles() + RolesGuard; mínimo 3 decoradores (@Roles, @CurrentUser, @Public); 401 sin token, token inválido o expirado; 403 sin rol	POST /api/auth/register, POST /api/auth/login, GET /api/auth/me	Público / JWT
 REQ-APIKEY	Al menos un endpoint para integraciones externas con header x-api-key; claves en API_KEYS (separadas por coma); validadas por un ApiKeyGuard propio; 401 si falta o es incorrecta	GET /api/integrations/vehicles/:plate/maintenances (historial, formato del ejemplo del PDF)	API key
 REQ-VEH	CRUD de vehículos: placa (única), marca, modelo, año, kilometraje, estado (AVAILABLE, IN_MAINTENANCE, INACTIVE); consulta por id o por placa; inactivación lógica sin borrar historial; un INACTIVE no recibe mantenimientos	GET/POST /api/vehicles, GET /api/vehicles/:id, GET /api/vehicles/plate/:plate, PATCH /api/vehicles/:id, PATCH /api/vehicles/:id/deactivate	JWT (escritura: ADMIN)
 REQ-MEC	CRUD de mecánicos: nombre, correo, especialidad, estado; activar e inactivar; un inactivo no recibe mantenimientos nuevos; la inactivación no borra historial; sin taller fijo	GET/POST /api/mechanics, GET /api/mechanics/:id, PATCH /api/mechanics/:id, PATCH /api/mechanics/:id/activate, /deactivate	JWT (escritura: ADMIN)
@@ -126,7 +126,7 @@ Runtime	Node 22, TypeScript
 Framework	NestJS (@nestjs/core, platform-express, swagger, typeorm, config, jwt)
 BD	PostgreSQL vía TypeORM (pg)
 Validación	class-validator + class-transformer (ValidationPipe global)
-Auth	@nestjs/jwt, argon2 para contraseñas
+Auth	@nestjs/jwt; contraseñas con hash (argon2 descartado, librería en memory.md → Decisiones)
 Tests	Jest (el que trae Nest; cuenta para puntos extra)
 Lint / formato	ESLint + Prettier (los del CLI de Nest)
 Contenedores (extra)	Dockerfile + docker-compose.yml (API + Postgres con volumen y red interna)
@@ -199,7 +199,7 @@ Restringe por rol con @Roles(UserRole.ADMIN, ...). Nunca strings sueltos.
 Enums solo en common/enums/. Valida con @IsEnum().
 Nunca devuelvas password. select: false en la columna y respuestas proyectadas.
 DTOs: ValidationPipe con whitelist + forbidNonWhitelisted + transform. Todo campo aceptado lleva decoradores de class-validator. Updates con PartialType.
-Contraseñas con argon2 (argon2.hash / argon2.verify). Mensaje genérico en login fallido ("Credenciales inválidas"), sin revelar si el correo existe.
+Contraseñas siempre hasheadas (nunca en texto plano; no se usa argon2). Mensaje genérico en login fallido ("Credenciales inválidas"), sin revelar si el correo existe.
 Mensajes de error en español, descriptivos (p. ej. "El vehículo ABC123 ya tiene un mantenimiento activo").
 Códigos HTTP: 200 lecturas y actualizaciones, 201 creaciones, 400 validación o regla de datos, 401 sin token / token inválido / API key incorrecta, 403 rol insuficiente o recurso ajeno, 404 inexistente, 409 conflicto de negocio o unicidad.
 Comentarios obligatorios (los exige la rúbrica) en guards, filtro, interceptor y transacciones: explica el porqué en 1–3 líneas, en español.
@@ -237,7 +237,7 @@ GET /api/integrations/vehicles/:plate/maintenances, header x-api-key. Respuesta 
 
 Debe crear como mínimo, y no duplicar si se ejecuta dos veces (buscar por clave única antes de insertar: email, placa, nombre de taller):
 
-1 ADMIN y 2 TECHNICIAN (contraseñas con argon2; credenciales de prueba en el README).
+1 ADMIN y 2 TECHNICIAN (contraseñas hasheadas; credenciales de prueba en el README).
 3 mecánicos: 2 activos vinculados a los técnicos, 1 inactivo.
 2 talleres: 1 activo, 1 inactivo.
 4 vehículos: 2 AVAILABLE, 1 IN_MAINTENANCE (con su mantenimiento IN_PROGRESS), 1 INACTIVE.

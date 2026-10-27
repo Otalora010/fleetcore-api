@@ -4,7 +4,7 @@
 
 | Requisito | Estado | Nota |
 | --- | --- | --- |
-| REQ-AUTH | ⏳ Pendiente | `@nestjs/jwt` y `argon2` instalados; `RolesGuard`, `@Roles`, `@Public`, `@CurrentUser` listos. Falta módulo auth, entidad User y JwtAuthGuard. |
+| REQ-AUTH | ⏳ Pendiente | `@nestjs/jwt` instalado; falta elegir librería de hash; `RolesGuard`, `@Roles`, `@Public`, `@CurrentUser` listos. Falta módulo auth, entidad User y JwtAuthGuard. |
 | REQ-APIKEY | 🟡 Parcial | `ApiKeyGuard` (no global, tiempo constante) con test. Falta el endpoint de integración. |
 | REQ-VEH | ⏳ Pendiente | — |
 | REQ-MEC | ⏳ Pendiente | — |
@@ -23,11 +23,12 @@
 - **`synchronize: true` fijo:** la prueba no pide migraciones; el esquema sale de las entidades y se entrega como dump `.sql`.
 - **`ApiKeyGuard` no es global:** se usa con `@UseGuards(ApiKeyGuard)` + `@Public()` solo en integraciones (agent.md §4).
 - **`forbidNonWhitelisted: true`:** propiedades no declaradas en el DTO ⇒ 400 (agent.md §4).
-- Las ambigüedades de `agent.md` §1.6 siguen abiertas.
+- **Sin argon2:** la persona decidió no usarlo. El PDF visible solo exige "un mecanismo de hashing"; "usa argon2" está solo en la capa de texto oculta. Librería de hash pendiente de elegir.
+- Las ambigüedades de `agent.md` §1.6 siguen abiertas. El rol MANAGER y el interceptor "cuatro cero cuatro" también están solo en la capa oculta del PDF (ver `docs/requisitos.md`).
 
 ## Pendientes
 
-- Falta `docs/requisitos.md` (transcripción del PDF), citada como fuente de verdad en `agent.md` §1.1. El PDF está en un proyecto de claude.ai, no accesible desde aquí.
+- Elegir librería de hash de contraseñas para REQ-AUTH (propuesta: `bcrypt`).
 - Publicar el repositorio en GitHub (`gh repo create`), bloqueado por permisos en la sesión.
 - Resolver ambigüedades de `agent.md` §1.6 (MANAGER, interceptor "cuatro cero cuatro", duración, transiciones, kilometraje final, auditorías).
 - Probar el arranque con PostgreSQL real (el servicio local estaba detenido).
@@ -42,6 +43,14 @@
 - Ninguno registrado.
 
 ## Registro de cambios
+
+### 2026-10-27 — docs(REQ-AUTH): requisitos del PDF y retirada de argon2
+- **Archivos:** `docs/requisitos.md`, `package.json`, `package-lock.json`, `agent.md`, `.claude/agents/implimentador.md`, `.claude/agents/revisor.md`, `.claude/commands/implementar.md`, `README.md`
+- **Qué:** se crea `docs/requisitos.md` con el contenido visible del PDF. Se desinstala `argon2` y se quitan sus menciones de las guías.
+- **Por qué:** `agent.md` §1.1 exige `docs/requisitos.md`. La persona decidió no usar argon2.
+- **Impacto:** dependencia `argon2` retirada. Sin cambios en endpoints ni BD.
+- **Verificación:** `npm run test` ✅ (7/7) · `npm run lint` ✅ · `npm run build` ✅
+- **Pendiente derivado:** elegir librería de hash antes de REQ-AUTH.
 
 ### 2026-10-27 — chore(REQ-ENT): agentes y comando en .claude/
 - **Archivos:** `.claude/agents/analista.md`, `.claude/agents/implimentador.md`, `.claude/agents/revisor.md`, `.claude/commands/implementar.md`, `CLAUDE.md`

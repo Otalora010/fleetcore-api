@@ -7,7 +7,7 @@ API REST para gestionar el ciclo de vida de los mantenimientos (preventivos y co
 
 ## Stack
 
-NestJS 12 · TypeScript · TypeORM · PostgreSQL · JWT (`@nestjs/jwt`) · argon2 · class-validator · Swagger · Jest · ESLint + Prettier
+NestJS 12 · TypeScript · TypeORM · PostgreSQL · JWT (`@nestjs/jwt`) · class-validator · Swagger · Jest · ESLint + Prettier
 
 ## Requisitos
 
