@@ -4,7 +4,7 @@
 
 | Requisito | Estado | Nota |
 | --- | --- | --- |
-| REQ-AUTH | ⏳ Pendiente | `@nestjs/jwt` instalado; falta elegir librería de hash; `RolesGuard`, `@Roles`, `@Public`, `@CurrentUser` listos. Falta módulo auth, entidad User y JwtAuthGuard. |
+| REQ-AUTH | ⏳ Pendiente | `@nestjs/jwt` instalado; hash con `bcrypt` (por instalar); `RolesGuard`, `@Roles`, `@Public`, `@CurrentUser` listos. Falta módulo auth, entidad User y JwtAuthGuard. |
 | REQ-APIKEY | 🟡 Parcial | `ApiKeyGuard` (no global, tiempo constante) con test. Falta el endpoint de integración. |
 | REQ-VEH | ⏳ Pendiente | — |
 | REQ-MEC | ⏳ Pendiente | — |
@@ -14,7 +14,7 @@
 | REQ-RES | 🟡 Parcial | Interceptor y filtro con formato §5; filtro traduce 23505/23503/22P02. Falta verificar con endpoints reales. |
 | REQ-DB | 🟡 Parcial | Conexión PostgreSQL configurada. Faltan entidades y relaciones. |
 | REQ-SEED | ⏳ Pendiente | — |
-| REQ-ENT | 🟡 Parcial | Repo git local con commits. Falta publicarlo en GitHub. README básico de FleetCore. |
+| REQ-ENT | 🟡 Parcial | Repo público: https://github.com/Otalora010/fleetcore-api. README básico de FleetCore. |
 
 ## Decisiones
 
@@ -23,15 +23,13 @@
 - **`synchronize: true` fijo:** la prueba no pide migraciones; el esquema sale de las entidades y se entrega como dump `.sql`.
 - **`ApiKeyGuard` no es global:** se usa con `@UseGuards(ApiKeyGuard)` + `@Public()` solo en integraciones (agent.md §4).
 - **`forbidNonWhitelisted: true`:** propiedades no declaradas en el DTO ⇒ 400 (agent.md §4).
-- **Sin argon2:** el enunciado solo exige "un mecanismo de hashing". Librería de hash pendiente de elegir.
+- **Hash con `bcrypt`, sin argon2:** el enunciado solo exige "un mecanismo de hashing". La persona eligió `bcrypt`.
 - **Roles solo ADMIN y TECHNICIAN:** son los del enunciado. No existe rol MANAGER.
 - **Sin interceptor "cuatro cero cuatro":** no forma parte del enunciado; no se implementa.
 - El resto de ambigüedades de `agent.md` §1.6 siguen abiertas.
 
 ## Pendientes
 
-- Elegir librería de hash de contraseñas para REQ-AUTH (propuesta: `bcrypt`).
-- Publicar el repositorio en GitHub (`gh repo create`), bloqueado por permisos en la sesión.
 - Resolver ambigüedades de `agent.md` §1.6 (técnico vs. mecánico, duración, transiciones, kilometraje final, auditorías).
 - Probar el arranque con PostgreSQL real (el servicio local estaba detenido).
 - Completar nombre del clan en `README.md`.
@@ -45,6 +43,14 @@
 - Ninguno registrado.
 
 ## Registro de cambios
+
+### 2026-10-27 — chore(REQ-ENT): publicar repositorio y elegir bcrypt
+- **Archivos:** `memory.md`
+- **Qué:** repositorio público creado en https://github.com/Otalora010/fleetcore-api. Se decide `bcrypt` para el hash de contraseñas.
+- **Por qué:** REQ-ENT exige repositorio público; REQ-AUTH exige hash de contraseñas.
+- **Impacto:** ninguno en código.
+- **Verificación:** sin cambios de código; no aplica.
+- **Pendiente derivado:** instalar `bcrypt` en REQ-AUTH.
 
 ### 2026-10-27 — refactor(REQ-AUTH): quitar rol MANAGER e interceptor "cuatro cero cuatro"
 - **Archivos:** `src/common/enums/user-role.enum.ts`, `src/common/decorators/roles.decorator.ts`, `docs/requisitos.md`, `agent.md`, `.claude/agents/analista.md`, `.claude/commands/implementar.md`
