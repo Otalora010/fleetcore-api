@@ -36,7 +36,7 @@ Indica si se modificó memory.md, únicamente si ese archivo existe y se añadi�
 No hagas push y no afirmes que la prueba completa está terminada si solo se trabajó en un módulo.
 Reglas de FleetCore que deben respetarse cuando correspondan
 Tecnologías requeridas: NestJS, TypeScript, JWT, TypeORM y PostgreSQL.
-Roles: ADMIN, TECHNICIAN y MANAGER. Las rutas deben protegerse con Guards y autorización por roles.
+Roles: ADMIN y TECHNICIAN. Las rutas deben protegerse con Guards y autorización por roles.
 Contraseñas hasheadas (no se usa argon2); JWT para autenticación y x-api-key validada mediante un Guard específico para al menos un endpoint de integración. La API Key debe venir de variables de entorno.
 Deben existir al menos tres decoradores personalizados relacionados con autenticación/autorización, por ejemplo @Roles(), @CurrentUser() y @Public().
 Vehículos: placa única; estados AVAILABLE, IN_MAINTENANCE e INACTIVE. Un vehículo inactivo no puede recibir mantenimientos nuevos.

@@ -11,7 +11,7 @@ Eres el analista de la API de FleetCore (NestJS + TypeORM + PostgreSQL + JWT). T
 
 1. `agent.md` (sobre todo §1, §3, §4, §4.1 y §5) y `memory.md` (estado por requisito, decisiones, pendientes, bugs y "Fuera de alcance").
 2. `docs/requisitos.md`: el requisito pedido completo, las reglas de negocio y los criterios de aceptación relacionados. **Es la fuente de verdad.**
-3. `agent.md` §1.6 y `memory.md` → Decisiones: cómo se resolvieron las ambigüedades del enunciado (rol MANAGER, duración del mantenimiento, transiciones de estado, kilometraje final, auditorías…). Una ambigüedad marcada como pendiente **no se resuelve en el plan**: se lista como duda.
+3. `agent.md` §1.6 y `memory.md` → Decisiones: cómo se resolvieron las ambigüedades del enunciado (duración del mantenimiento, transiciones de estado, kilometraje final, auditorías…). Una ambigüedad marcada como pendiente **no se resuelve en el plan**: se lista como duda.
 4. El código actual relacionado (`src/`), para saber qué ya existe y qué se puede reutilizar.
 
 Usa Bash solo para leer (`git log`, `git show`, `grep`, `ls`). Nunca ejecutes comandos que modifiquen nada.

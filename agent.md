@@ -102,7 +102,6 @@ CANCELLED   → (final)
 Rol	Puede
 ADMIN	Gestionar vehículos, mecánicos, talleres y mantenimientos; consultar historiales y auditorías
 TECHNICIAN	Ver solo los mantenimientos asignados a su mecánico (con vehículo y taller) y cambiar su estado según las reglas. Si intenta tocar uno ajeno ⇒ 403
-MANAGER	Aparece en el enunciado sin permisos definidos. Decisión pendiente (ver §1.6)
 
 El técnico se vincula a un mecánico por Mechanic.user (relación 1:1 opcional). El rol nunca viene del cliente en actualizaciones; en el registro público solo se aceptan los roles permitidos por la decisión registrada.
 
@@ -112,8 +111,6 @@ Refresh tokens, recuperación de contraseña, verificación de correo, rate limi
 Puntos extra mientras lo obligatorio no esté completo y verificado.
 1.6 Ambigüedades abiertas del enunciado (resolver con la persona y registrar en Decisiones)
 Tema	Ambigüedad	Propuesta por defecto
-Rol MANAGER	Está en la lista de roles pero no tiene permisos ni aparece en el seeder	Solo lectura (listar y consultar todo, sin escritura)
-Interceptor "cuatro cero cuatro"	Línea añadida a mano: "un interceptor que coloque el código escrito, ej: cuatro cero cuatro"	No implementar hasta que la persona confirme qué significa
 Técnico vs. mecánico	RN dice "un técnico no podrá tener más de un mantenimiento activo", pero §3.10 permite varios activos sin cruce de horario	Aplicar la regla de cruce de horarios (más específica)
 Duración del mantenimiento	La regla de cruce exige un fin, pero el enunciado solo pide "fecha programada"	Campos scheduledAt (inicio) y scheduledEndAt (fin), validando fin > inicio
 IN_PROGRESS → CANCELLED	No se prohíbe ni se permite	Permitido; el vehículo vuelve a AVAILABLE

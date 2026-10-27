@@ -23,14 +23,16 @@
 - **`synchronize: true` fijo:** la prueba no pide migraciones; el esquema sale de las entidades y se entrega como dump `.sql`.
 - **`ApiKeyGuard` no es global:** se usa con `@UseGuards(ApiKeyGuard)` + `@Public()` solo en integraciones (agent.md §4).
 - **`forbidNonWhitelisted: true`:** propiedades no declaradas en el DTO ⇒ 400 (agent.md §4).
-- **Sin argon2:** la persona decidió no usarlo. El PDF visible solo exige "un mecanismo de hashing"; "usa argon2" está solo en la capa de texto oculta. Librería de hash pendiente de elegir.
-- Las ambigüedades de `agent.md` §1.6 siguen abiertas. El rol MANAGER y el interceptor "cuatro cero cuatro" también están solo en la capa oculta del PDF (ver `docs/requisitos.md`).
+- **Sin argon2:** el enunciado solo exige "un mecanismo de hashing". Librería de hash pendiente de elegir.
+- **Roles solo ADMIN y TECHNICIAN:** son los del enunciado. No existe rol MANAGER.
+- **Sin interceptor "cuatro cero cuatro":** no forma parte del enunciado; no se implementa.
+- El resto de ambigüedades de `agent.md` §1.6 siguen abiertas.
 
 ## Pendientes
 
 - Elegir librería de hash de contraseñas para REQ-AUTH (propuesta: `bcrypt`).
 - Publicar el repositorio en GitHub (`gh repo create`), bloqueado por permisos en la sesión.
-- Resolver ambigüedades de `agent.md` §1.6 (MANAGER, interceptor "cuatro cero cuatro", duración, transiciones, kilometraje final, auditorías).
+- Resolver ambigüedades de `agent.md` §1.6 (técnico vs. mecánico, duración, transiciones, kilometraje final, auditorías).
 - Probar el arranque con PostgreSQL real (el servicio local estaba detenido).
 - Completar nombre del clan en `README.md`.
 
@@ -43,6 +45,14 @@
 - Ninguno registrado.
 
 ## Registro de cambios
+
+### 2026-10-27 — refactor(REQ-AUTH): quitar rol MANAGER e interceptor "cuatro cero cuatro"
+- **Archivos:** `src/common/enums/user-role.enum.ts`, `src/common/decorators/roles.decorator.ts`, `docs/requisitos.md`, `agent.md`, `.claude/agents/analista.md`, `.claude/commands/implementar.md`
+- **Qué:** `UserRole` queda con ADMIN y TECHNICIAN. Se quitan de las guías el rol MANAGER y el interceptor "cuatro cero cuatro", y la nota sobre ellos en `docs/requisitos.md`.
+- **Por qué:** la persona indicó que no forman parte del enunciado.
+- **Impacto:** enum de roles. Sin endpoints afectados.
+- **Verificación:** `npm run test` ✅ (7/7) · `npm run lint` ✅ · `npm run build` ✅
+- **Pendiente derivado:** ninguno.
 
 ### 2026-10-27 — docs(REQ-AUTH): requisitos del PDF y retirada de argon2
 - **Archivos:** `docs/requisitos.md`, `package.json`, `package-lock.json`, `agent.md`, `.claude/agents/implimentador.md`, `.claude/agents/revisor.md`, `.claude/commands/implementar.md`, `README.md`
