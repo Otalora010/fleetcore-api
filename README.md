@@ -3,7 +3,7 @@
 API REST para gestionar el ciclo de vida de los mantenimientos (preventivos y correctivos) de la flota de FleetCore: vehículos, mecánicos, talleres y mantenimientos, con autenticación JWT y roles.
 
 > Prueba de desempeño – Módulo 6.2 NestJS.
-> **Coder:** Santiago Otalora · **Clan:** _pendiente_
+> **Coder:** Santiago Otalora · **Clan:** Ruta Node/Nest
 
 ## Stack
 

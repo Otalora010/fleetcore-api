@@ -32,7 +32,6 @@
 
 - Resolver ambigüedades de `agent.md` §1.6 (técnico vs. mecánico, duración, transiciones, kilometraje final, auditorías).
 - Probar el arranque con PostgreSQL real (el servicio local estaba detenido).
-- Completar nombre del clan en `README.md`.
 
 ## Fuera de alcance
 
@@ -43,6 +42,14 @@
 - Ninguno registrado.
 
 ## Registro de cambios
+
+### 2026-10-27 — docs(REQ-ENT): clan del coder en README
+- **Archivos:** `README.md`
+- **Qué:** se completa el clan: Ruta Node/Nest.
+- **Por qué:** el entregable exige nombre y clan del coder en el README.
+- **Impacto:** ninguno.
+- **Verificación:** sin cambios de código; no aplica.
+- **Pendiente derivado:** ninguno.
 
 ### 2026-10-27 — chore(REQ-ENT): publicar repositorio y elegir bcrypt
 - **Archivos:** `memory.md`
