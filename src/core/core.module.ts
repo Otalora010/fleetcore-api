@@ -1,8 +1,10 @@
 import { Global, Module, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import configuration from '../config/configuration.js';
+import configuration, { AppConfig } from '../config/configuration.js';
 import { validateEnv } from '../config/env.validation.js';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { ResponseInterceptor } from '../common/interceptors/response.interceptor.js';
 import { AllExceptionsFilter } from '../common/filters/all-exceptions.filter.js';
@@ -10,7 +12,8 @@ import { AllExceptionsFilter } from '../common/filters/all-exceptions.filter.js'
 /**
  * Infraestructura transversal registrada UNA sola vez.
  * Al registrarse como APP_* aplica a toda la app sin repetir nada en main.ts.
- * El JwtAuthGuard global se registrará aquí, antes de RolesGuard (REQ-AUTH).
+ * Orden de guards globales: JwtAuthGuard (autentica) → RolesGuard (autoriza).
+ * JwtModule es global y se configura una sola vez aquí.
  */
 @Global()
 @Module({
@@ -20,8 +23,23 @@ import { AllExceptionsFilter } from '../common/filters/all-exceptions.filter.js'
       load: [configuration],
       validate: validateEnv,
     }),
+    JwtModule.registerAsync({
+      global: true,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const jwt = config.getOrThrow<AppConfig['jwt']>('jwt');
+        return {
+          secret: jwt.secret,
+          // JWT_EXPIRES_IN llega como string ("1h"); el tipo de @nestjs/jwt es más estricto.
+          signOptions: {
+            expiresIn: jwt.expiresIn as JwtSignOptions['expiresIn'],
+          },
+        };
+      },
+    }),
   ],
   providers: [
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     {
       provide: APP_PIPE,

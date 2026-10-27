@@ -61,3 +61,11 @@ Error:
 ## Pendiente de documentar
 
 Credenciales de prueba del seeder, endpoints, reglas de negocio, dump `.sql` y evidencias. Se completan a medida que se implementa cada requisito (ver `memory.md`).
+
+## Autenticación
+
+- `POST /api/auth/register` (público): crea un usuario con rol `ADMIN` o `TECHNICIAN`. Contraseña mínima de 8 caracteres.
+- `POST /api/auth/login` (público): devuelve `{ accessToken, user }`.
+- `GET /api/auth/me`: datos del usuario autenticado (requiere Bearer).
+- En Swagger (`/api/docs`) usa el botón **Authorize** y pega el `accessToken` (sin el prefijo `Bearer`).
+- Riesgo conocido: como el enunciado lo exige literalmente, el registro público permite crear usuarios `ADMIN`, es decir, cualquiera puede escalar privilegios. Aceptado para la prueba; en producción se restringiría.

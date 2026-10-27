@@ -4,7 +4,7 @@
 
 | Requisito | Estado | Nota |
 | --- | --- | --- |
-| REQ-AUTH | ⏳ Pendiente | `@nestjs/jwt` instalado; hash con `bcrypt` (por instalar); `RolesGuard`, `@Roles`, `@Public`, `@CurrentUser` listos. Falta módulo auth, entidad User y JwtAuthGuard. |
+| REQ-AUTH | 🟡 Parcial | Implementado: register, login, me, `JwtAuthGuard` global, `RolesGuard`, entidad `User`, con tests. Falta prueba manual con PostgreSQL real. |
 | REQ-APIKEY | 🟡 Parcial | `ApiKeyGuard` (no global, tiempo constante) con test. Falta el endpoint de integración. |
 | REQ-VEH | ⏳ Pendiente | — |
 | REQ-MEC | ⏳ Pendiente | — |
@@ -26,6 +26,12 @@
 - **Hash con `bcrypt`, sin argon2:** el enunciado solo exige "un mecanismo de hashing". La persona eligió `bcrypt`.
 - **Roles solo ADMIN y TECHNICIAN:** son los del enunciado. No existe rol MANAGER.
 - **Sin interceptor "cuatro cero cuatro":** no forma parte del enunciado; no se implementa.
+- **Registro público acepta ADMIN y TECHNICIAN:** cumplimiento literal del enunciado. Riesgo de escalada de privilegios documentado en README.
+- **Login:** responde `{ accessToken, user: { id, name, email, role } }`; payload JWT `{ sub, email, role }`.
+- **`GET /api/auth/me`:** lee el usuario de la BD por `user.id` (404 si no existe), sin password.
+- **`JwtAuthGuard` no consulta la BD:** el token vale hasta expirar.
+- **Contraseña:** mínimo 8 caracteres; bcrypt con costo 10.
+- **JwtModule:** configurado una sola vez en `CoreModule` (`global: true`, `registerAsync`).
 - El resto de ambigüedades de `agent.md` §1.6 siguen abiertas.
 
 ## Pendientes
@@ -42,6 +48,15 @@
 - Ninguno registrado.
 
 ## Registro de cambios
+
+### 2026-10-27 — feat(REQ-AUTH): registro, login, me y guard JWT global
+- **Archivos:** `package.json`, `package-lock.json`, `README.md`, `src/app.module.ts`, `src/core/core.module.ts`, `src/common/guards/jwt-auth.guard.ts`, `src/common/guards/jwt-auth.guard.spec.ts`, `src/common/guards/roles.guard.spec.ts`, `src/modules/users/entities/user.entity.ts`, `src/modules/users/users.module.ts`, `src/modules/auth/{auth.module,auth.controller,auth.service,auth.service.spec}.ts`, `src/modules/auth/dto/{register.dto,login.dto,register.dto.spec}.ts`
+- **Qué:** endpoints `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`. Entidad `User` (password `select:false`). `JwtAuthGuard` global antes de `RolesGuard`. Se instalan `bcrypt` y `@types/bcrypt` (hash de contraseñas, decisión previa). Cast a `JwtSignOptions['expiresIn']` (de `@nestjs/jwt`) para `JWT_EXPIRES_IN`; sin depender de `ms`.
+- **Por qué:** REQ-AUTH.
+- **Impacto:** tabla `users` (synchronize). Todo endpoint queda protegido salvo `@Public()`. Sin variables nuevas.
+- **Verificación:** `npm run test` ✅ (30/30) · `npm run lint` ✅ · `npm run build` ✅ · `require('bcrypt')` carga bien · sin prueba manual (PostgreSQL apagado).
+- **Corrección ronda 1 (revisor):** se quita el import de `ms`; `LoginResponseDto` documenta el 200 de login en Swagger (`src/modules/auth/dto/login-response.dto.ts`); comentario del porqué en `jwt-auth.guard.ts`.
+- **Pendiente derivado:** prueba manual con PostgreSQL; el seeder (REQ-SEED) creará usuarios con bcrypt.
 
 ### 2026-10-27 — docs(REQ-ENT): clan del coder en README
 - **Archivos:** `README.md`
